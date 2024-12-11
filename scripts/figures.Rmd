@@ -1,0 +1,442 @@
+```r
+---
+title: "genome_analysis"
+output: html_document
+date: "2024-11-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##READ INITIAL FILES
+```{r}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(reshape2)
+
+setwd("C:/Users/DAVID 21/OneDrive/Documentos/8vo ciclo/Bioinfo/eggnog")
+cus<-read_tsv("cuscuta_eggnog.tsv") 
+
+ara<-read_tsv("arabidopsis_eggnog.tsv") 
+
+cr<-read_tsv("chlamydomonas_eggnog.tsv") 
+ro<-read_tsv("gorgonias_eggnog.tsv")
+```
+
+## Table with percentage of genes annotated with GO for each species
+```{r}
+species <- c("Arabidopsis", "Chlamydomonas", "Roridula", "Cuscuta")
+# Create a vector with the corresponding counts
+protein_counts <- c(48265, 19527, 22655, 18157)
+# Create the dataframe
+total <- data.frame(species = species, protein_count = protein_counts)
+arabidopsis_GO <- sum(ara$GOs != "-")
+chlamydomonas_GO <- sum(cr$GOs != "-")
+roridula_GO <- sum(ro$GOs != "-")
+cuscuta_GO <- sum(cus$GOs != "-")
+# Create a vector with the counts of proteins annotated with GO
+annotated_GO <- c(arabidopsis_GO, chlamydomonas_GO, roridula_GO, cuscuta_GO)
+total$annotated_GO <- annotated_GO
+total$fraction_annotated<-total$annotated_GO*100/total$protein_count
+# Rename columns
+colnames(total) <- c("Species", "Number of proteins", "Proteins annotated with GO", "Annotated percentage")
+# Create a vector with italicized species names
+species_labels <- c(
+  "Arabidopsis" = "A. thaliana",
+  "Chlamydomonas" = "C. reinhardtii",
+  "Roridula" = "R. gorgonias",
+  "Cuscuta" = "C. campestris"
+)
+# Replace species names in the dataframe
+total$Species <- species_labels[total$Species]
+# Format the percentage with the percentage symbol and two decimals
+total$`Annotated percentage` <- sprintf("%.2f%%", total$`Annotated percentage`)
+# Create the table with kable and format with kableExtra
+tabla_html <- total %>%
+  kbl(align = "lccc", format = "html", escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                full_width = FALSE, 
+                position = "center") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  column_spec(1, italic = TRUE)
+
+# Print the table in RStudio (if you are in RStudio)
+print(tabla_html)
+# Export the table to an HTML file
+save_kable(tabla_html, "tabla_go.html")
+```
+
+## NUMBER OF ORTHOLOGS SHARED BETWEEN SPECIES:
+```{r}
+datos <- data.frame(
+  Species = c("Arabidopsis", "Chlamydomonas", "Cuscuta", "Gorgonias"),
+  Arabidopsis = c(0.0, 14939.0, 26432.0, 29358.0),
+  Chlamydomonas = c(5454.0, 0.0, 5159.0, 5415.0),
+  Cuscuta = c(13042.0, 6356.0, 0.0, 12891.0),
+  Gorgonias = c(17778.0, 8102.0, 15939.0, 0.0),
+  stringsAsFactors = FALSE
+)
+# Create a vector with italicized scientific names
+species_labels <- c(
+  "Arabidopsis" = "A. thaliana",
+  "Chlamydomonas" = "C. reinhardtii",
+  "Cuscuta" = "C. campestris",
+  "Gorgonias" = "R. gorgonias"
+)
+
+# Replace species names in rows
+datos$Species <- species_labels[datos$Species]
+
+# Replace species names in columns
+colnames(datos)[2:5] <- species_labels[colnames(datos)[2:5]]
+
+# Create the table with kable and format with kableExtra
+tabla_html <- datos %>%
+  kbl(align = "lcccc", format = "html", escape = FALSE) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  column_spec(1, italic = TRUE)
+
+# Print the table in RStudio
+print(tabla_html)
+
+# Export the table to an HTML file
+save_kable(tabla_html, "tabla_ortologos.html")
+```
+
+## Count of genes belonging to none, orthogroups of size 2 and orthogroups of size ≥3
+```{r}
+ortho<-read_tsv("Orthogroups.GeneCount.tsv")
+# Create a new data frame with the "Number of unassigned genes"
+unassigned_row <- data.frame(
+  Orthogroup = "Unassigned Genes",
+  arabidopsis = 5015,
+  clamydomonas = 5526,
+  cuscuta = 2151,
+  gorgonias = 1836,
+  Total = 5015 + 5526 + 2151 + 1836
+)
+ortho <- rbind(unassigned_row, ortho)
+
+species_totals <- c(
+  "A. thaliana" = 48265,
+  "C. reinhardtii" = 19527,
+  "C. campestris" = 18157,
+  "R. gorgonias" = 22655
+)
+
+# Extract unassigned genes (singletons)
+singleton_genes <- ortho %>%
+  filter(Orthogroup == "Unassigned Genes") %>%
+  select(arabidopsis, clamydomonas, cuscuta, gorgonias) %>%
+  unlist()
+names(singleton_genes) <- c("A. thaliana", "C. reinhardtii", "C. campestris", "R. gorgonias")
+
+# Genes in orthogroups of size 2
+genes_size_2 <- ortho %>%
+  filter(Total == 2) %>%
+  summarise(
+    arabidopsis = sum(arabidopsis),
+    clamydomonas = sum(clamydomonas),
+    cuscuta = sum(cuscuta),
+    gorgonias = sum(gorgonias)
+  ) %>%
+  unlist()
+names(genes_size_2) <- c("A. thaliana", "C. reinhardtii", "C. campestris", "R. gorgonias")
+
+# Genes in orthogroups of size ≥3
+genes_size_3plus <- ortho %>%
+  filter(Total >= 3) %>% 
+  filter(Total != 14528) %>%
+  summarise(
+    arabidopsis = sum(arabidopsis),
+    clamydomonas = sum(clamydomonas),
+    cuscuta = sum(cuscuta),
+    gorgonias = sum(gorgonias)
+  ) %>%
+  unlist()
+names(genes_size_3plus) <- c("A. thaliana", "C. reinhardtii", "C. campestris", "R. gorgonias")
+
+# Calculate percentages
+percent_singletons <- (singleton_genes / species_totals) * 100
+percent_size_2 <- (genes_size_2 / species_totals) * 100
+percent_size_3plus <- (genes_size_3plus / species_totals) * 100
+
+# Create individual dataframes
+df_singletons <- data.frame(
+  Species = names(percent_singletons),
+  Category = "Singletons",
+  Percentage = as.numeric(percent_singletons)
+)
+
+df_size_2 <- data.frame(
+  Species = names(percent_size_2),
+  Category = "Two-genes",
+  Percentage = as.numeric(percent_size_2)
+)
+
+df_size_3plus <- data.frame(
+  Species = names(percent_size_3plus),
+  Category = "≥3",
+  Percentage = as.numeric(percent_size_3plus)
+)
+
+# Combine dataframes
+df_plot <- rbind(df_singletons, df_size_2, df_size_3plus)
+
+# Reorder categories
+df_plot$Category <- factor(df_plot$Category, levels = c("≥3", "Two-genes","Singletons" ))
+
+# Reorder species
+df_plot$Species <- factor(df_plot$Species, levels = c("C. campestris","R. gorgonias", "A. thaliana", "C. reinhardtii"))
+
+# Define colors
+colors <- c(
+  "≥3"         = "#CC6666",
+  "Two-genes"  = "#6699CC",
+  "Singletons" = "#66BB66"
+)
+
+# Create italic labels for species
+species_labels <- c(
+  expression(italic("C. campestris")),
+  expression(italic("R. gorgonias")),
+  expression(italic("A. thaliana")),
+  expression(italic("C. reinhardtii"))
+)
+
+# Create the plot
+gg<-ggplot(df_plot, aes(x = Species, y = Percentage, fill = Category)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_manual(values = colors) +
+  scale_x_discrete(labels = species_labels) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), labels = seq(0, 100, by = 20)) +
+  guides(fill = guide_legend(reverse = TRUE))+
+  labs(x = "", y = "Fraction (%)") +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(face = "italic", size=12),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5),
+    panel.grid.minor = element_line(size = 0.25)
+  )
+```
+
+## Count of genes belonging to none, species-specific orthogroups, and orthogroups shared between at least two species
+```{r}
+# Create the dataframe with the provided data
+datos <- data.frame(
+  Variable = c(
+    "Number of genes",
+    "Number of genes in orthogroups",
+    "Number of unassigned genes",
+    "Percentage of genes in orthogroups",
+    "Percentage of unassigned genes",
+    "Number of orthogroups containing species",
+    "Percentage of orthogroups containing species",
+    "Number of species-specific orthogroups",
+    "Number of genes in species-specific orthogroups",
+    "Percentage of genes in species-specific orthogroups"
+  ),
+  arabidopsis = c(
+    48265, 43250, 5015, 89.6, 10.4, 13885, 80.5, 2680, 11611, 24.1
+  ),
+  clamydomonas = c(
+    19527, 14001, 5526, 71.7, 28.3, 6573, 38.1, 2018, 8397, 43.0
+  ),
+  cuscuta = c(
+    18157, 16006, 2151, 88.2, 11.8, 10398, 60.2, 381, 1979, 10.9
+  ),
+  gorgonias = c(
+    22655, 20819, 1836, 91.9, 8.1, 11646, 67.5, 484, 1517, 6.7
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Extract needed percentages
+percent_singletons <- as.numeric(datos[datos$Variable == "Percentage of unassigned genes", c("arabidopsis", "clamydomonas", "cuscuta", "gorgonias")])
+percent_species_specific <- as.numeric(datos[datos$Variable == "Percentage of genes in species-specific orthogroups", c("arabidopsis", "clamydomonas", "cuscuta", "gorgonias")])
+
+# Calculate the percentage of genes in shared orthogroups
+percent_shared <- 100 - (percent_singletons + percent_species_specific)
+species_names <- c("arabidopsis", "clamydomonas", "cuscuta", "gorgonias")
+
+# Create a dataframe with the percentages
+species_names <- c("arabidopsis", "clamydomonas", "cuscuta", "gorgonias")
+df_percentages <- data.frame(
+  Species = species_names,
+  Singletons = percent_singletons,
+  `Species-specific` = percent_species_specific,
+  `Shared orthogroups` = percent_shared,
+  stringsAsFactors = FALSE
+)
+
+# Transform the dataframe to long format
+df_plot <- df_percentages %>%
+  pivot_longer(
+    cols = c("Singletons", "Species-specific", "Shared orthogroups"),
+    names_to = "Category",
+    values_to = "Percentage"
+  )
+
+# Adjust species and category names
+species_labels <- c(
+  arabidopsis = "A. thaliana",
+  clamydomonas = "C. reinhardtii",
+  cuscuta = "C. campestris",
+  gorgonias = "R. gorgonias"
+)
+
+df_plot$Species <- species_labels[df_plot$Species]
+
+# Reorder species
+df_plot$Species <- factor(df_plot$Species, levels = c("C. campestris","R. gorgonias", "A. thaliana", "C. reinhardtii"))
+
+# Rename categories
+df_plot$Category <- gsub("\\.", " ", df_plot$Category)
+
+# Set levels in the desired order
+df_plot$Category <- factor(df_plot$Category, levels = c("Shared orthogroups","Species specific", "Singletons"))
+
+# Create italic labels for species
+species_labels_italic <- c(
+  expression(italic("C. campestris")),
+  expression(italic("R. gorgonias")),
+  expression(italic("A. thaliana")),
+  expression(italic("C. reinhardtii"))
+)
+
+# Define colors
+colors <- c(
+  "Shared orthogroups"  = "#CC6666",
+  "Species specific"     = "#6699CC",
+  "Singletons"           = "#66BB66"
+)
+
+# Create the plot
+library(ggplot2)
+
+gg<-ggplot(df_plot, aes(x = Species, y = Percentage, fill = Category)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_flip() +
+  scale_fill_manual(values = colors) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 20),
+    labels = seq(0, 100, by = 20)
+  ) +
+  scale_x_discrete(labels = species_labels_italic) +
+  labs(x = "", y = "Fraction (%)") +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5),
+    panel.grid.minor = element_line(size = 0.25)
+  )
+```
+
+##Enrichment table
+```{r}
+table<-read_tsv("analysis (2).txt")
+ttable <- table %>%
+  filter(`upload_1 (over/under)` == "+") %>%
+  filter(`upload_1 (fold Enrichment)`>=2) %>% 
+  mutate(
+    `upload_1 (fold Enrichment)` = as.numeric(`upload_1 (fold Enrichment)`),
+    `upload_1 (FDR)` = as.numeric(`upload_1 (FDR)`),
+    `upload_1 (raw P-value)` = as.numeric(`upload_1 (raw P-value)`)
+  ) %>%
+  arrange(
+    `upload_1 (FDR)`
+  )
+
+# Select the columns you want to include in the table
+columns_to_export <- c(
+  "GO biological process complete",
+  "upload_1 (fold Enrichment)",
+  "upload_1 (raw P-value)",
+  "upload_1 (FDR)"
+)
+
+# Create the HTML table
+html_table <- ttable %>%
+  select(all_of(columns_to_export)) %>%
+  kable(format = "html", escape = FALSE, align = "l") %>%
+  kable_styling(full_width = TRUE, bootstrap_options = c("striped", "hover"))
+
+# Save the HTML table to a file
+output_file <- "tabla_go_synteny_ordenada.html"
+save_kable(html_table, output_file)
+
+allvsall<-ttable
+
+# Check the structure of the table after conversions
+str(ttable)
+```
+
+## PERFORM COUNT OF SPECIFIC GO TERMS PER SPECIES AND BAR PLOT
+```{r}
+datos <- data.frame(
+  GO = c("GO:0015979", "GO:0019253", "GO:0019685", "GO:1902025", "GO:0010110", "GO:1902019"),
+  Name = c(
+    "Photosynthesis",
+    "Reductive pentose-phosphate cycle",
+    "Dark reaction of photosynthesis",
+    "Nitrate import",
+    "Regulation of dark reaction of photosynthesis",
+    "Regulation of cilium-dependent cell motility"
+  ),
+  Arabidopsis = c(261, 9, 9, 12, 3, 0),
+  Chlamydomonas = c(4, 1, 1, 0, 1, 5),
+  Cuscuta = c(63, 5, 5, 4, 1, 0),
+  Roridula = c(93, 4, 4, 7, 0, 0),
+  Total = c(421, 19, 19, 23, 5, 5)
+)
+
+# View the dataframe
+print(datos)
+
+# Transform data for visualization
+datos_melt <- melt(datos, id.vars = c("GO", "Name", "Total"), variable.name = "Species", value.name = "Count")
+datos$Name <- str_wrap(datos$Name, width = 25)
+
+# Create a bar plot
+g<-ggplot(datos_melt, aes(x = Name, y = Count, fill = Species)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  xlab("GO Term") +
+  ylab("Count") +
+  ggtitle("Counts per GO term and species") +
+  theme(axis.text.x = element_text(size=9))
+
+# Create a nice HTML table
+tabla_html <- datos %>%
+  kbl(caption = "GO term counts per species", align = 'lcccccc') %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed", "responsive")
+  ) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2, width = "25em") %>%
+  scroll_box(width = "100%", height = "400px")
+
+# Export the table to an HTML file
+save_kable(tabla_html, "recuentos_GO.html")
+
+```
