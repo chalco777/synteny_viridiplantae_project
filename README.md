@@ -39,6 +39,6 @@ For more information on the objectives, methodology, and detailed analysis, plea
 - Adrián Alexandro Chalco González  
 - Nataly Cahuana Mamani  
 
-**Professors:** Felipe Yon  
+**Professor:** Felipe Yon  
 **Year:** 2024  
 **Location:** Lima, Peru
