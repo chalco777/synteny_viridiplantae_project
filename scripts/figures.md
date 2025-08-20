@@ -341,7 +341,7 @@ gg<-ggplot(df_plot, aes(x = Species, y = Percentage, fill = Category)) +
   )
 ```
 
-##Enrichment table
+## Enrichment table
 ```{r}
 table<-read_tsv("analysis (2).txt")
 ttable <- table %>%
@@ -379,8 +379,8 @@ allvsall<-ttable
 # Check the structure of the table after conversions
 str(ttable)
 ```
+## Perform count of specific GO terms per species and barplot
 
-## PERFORM COUNT OF SPECIFIC GO TERMS PER SPECIES AND BAR PLOT
 ```{r}
 datos <- data.frame(
   GO = c("GO:0015979", "GO:0019253", "GO:0019685", "GO:1902025", "GO:0010110", "GO:1902019"),
@@ -430,4 +430,5 @@ tabla_html <- datos %>%
 save_kable(tabla_html, "recuentos_GO.html")
 
 ```
+
 
