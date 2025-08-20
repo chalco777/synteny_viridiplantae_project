@@ -1,15 +1,5 @@
-```r
----
-title: "genome_analysis"
-output: html_document
-date: "2024-11-26"
----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-##READ INITIAL FILES
+## Read initial files
 ```{r}
 library(tidyverse)
 library(knitr)
@@ -68,7 +58,7 @@ print(tabla_html)
 save_kable(tabla_html, "tabla_go.html")
 ```
 
-## NUMBER OF ORTHOLOGS SHARED BETWEEN SPECIES:
+## Number of orthologs shared between species 
 ```{r}
 datos <- data.frame(
   Species = c("Arabidopsis", "Chlamydomonas", "Cuscuta", "Gorgonias"),
@@ -440,3 +430,4 @@ tabla_html <- datos %>%
 save_kable(tabla_html, "recuentos_GO.html")
 
 ```
+
