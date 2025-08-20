@@ -1,12 +1,10 @@
 mcscanx_analysis_stringent/all_new.blast filter=lfs diff=lfs merge=lfs -text
 programs filter=lfs diff=lfs merge=lfs -text
 blast/.f* filter=lfs diff=lfs merge=lfs -text
-*.html linguist-generated
-*.log  linguist-generated
-*.err  linguist-generated
-*.out  linguist-generated
-*.csv  linguist-generated
-*.tsv  linguist-generated
-blast/** linguist-generated
+*.html linguist-vendored
+*.log  linguist-vendored
+blast/** linguist-vendored
+**/all_new.html/** linguist-vendored
+
 
 
