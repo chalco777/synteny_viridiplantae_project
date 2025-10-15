@@ -1,8 +1,13 @@
-# Course Project: Analysis of Synteny and Conservation of Metabolic Pathways in Photosynthetic Organisms
+# Analysis of Synteny and Conservation of Metabolic Pathways in Photosynthetic Organisms
 
 ## General Description
 
 This project, developed during the Bioinformatics II course, at Peruvian University Cayetano Heredia, explores the synteny and conservation of metabolic pathways in four representative photosynthetic species: a unicellular alga (*Chlamydomonas reinhardtii*), a model plant (*Arabidopsis thaliana*), a parasitic plant (*Cuscuta australis*), and a carnivorous plant (*Roridula gorgonias*). The main objective was to identify conserved orthologous genes and syntenic blocks among these species to better understand how key metabolic pathways have been maintained throughout evolution.
+
+## Complete Details
+
+For more information on the objectives, methodology, and detailed analysis, please refer to the full document available here [Complete Proceedings](./Complete_Proceedings_EN.md).
+
 
 ## Main Results
 
@@ -28,10 +33,6 @@ This project, developed during the Bioinformatics II course, at Peruvian Univers
    - A general analysis of GO term counts across the genome was performed, focusing on key pathways such as photosynthesis. The results showed that *Arabidopsis thaliana* has the highest number of genes associated with most GO terms, except for the GO term related to cilia-dependent cell motility, which is unique to *Chlamydomonas reinhardtii*. This highlights the role of *Chlamydomonas* as a unicellular, aquatic organism with distinct adaptations.
    - The parasitic plant *Cuscuta australis* exhibited a notable reduction in genes involved in photosynthesis and related processes (e.g., nitrate import and dark photosynthetic reactions), consistent with its loss of autotrophy. Similarly, *Roridula gorgonias* showed similar reductions, reflecting its carnivorous lifestyle and reliance on alternative nutrient sources.
    - In syntenic blocks, GO terms enriched between *Arabidopsis thaliana* and *Cuscuta australis* included genes critical for cell cycle regulation, ion transport, and stress response, indicating conserved pathways vital for terrestrial adaptation.
-
-## Complete Details
-
-For more information on the objectives, methodology, and detailed analysis, please refer to the full document available in the PDF file: **Complete Proceedings**.
 
 ---
 
