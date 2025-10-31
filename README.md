@@ -4,10 +4,7 @@
 
 This project, developed during the Bioinformatics II course, at Peruvian University Cayetano Heredia, explores the synteny and conservation of metabolic pathways in four representative photosynthetic species: a unicellular alga (*Chlamydomonas reinhardtii*), a model plant (*Arabidopsis thaliana*), a parasitic plant (*Cuscuta australis*), and a carnivorous plant (*Roridula gorgonias*). The main objective was to identify conserved orthologous genes and syntenic blocks among these species to better understand how key metabolic pathways have been maintained throughout evolution.
 
-## Full Analysis & Figures
-
-For more information on the objectives, methodology, graphics and detailed analysis, please refer to the **full document** available here [Complete Proceedings](./Complete_Proceedings_EN.md).
-
+> ### ⚠️ **IMPORTANT:** For more information on the objectives, methodology, figures and detailed analysis, please refer to the full document [**Complete Proceedings**](./Complete_Proceedings_EN.md).
 
 ## Main Results
 
